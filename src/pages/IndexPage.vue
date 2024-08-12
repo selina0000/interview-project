@@ -3,70 +3,223 @@
     <div class="block-item">
       <div class="row justify-between items-center">
         <div class="text-h6">員工基本資訊</div>
+
         <div>
-          <q-btn class="q-mr-sm" color="primary" label="新增" />
-          <q-btn color="white" text-color="black" label="刪除" />
+          <q-btn class="q-mr-sm" color="primary" label="新增" @click="addRow" />
+          <q-btn
+            color="white"
+            text-color="black"
+            label="刪除"
+            @click="deleteBtn"
+          />
         </div>
       </div>
       <QTable
         :columns="state.columns"
+        :rows="state.rows"
+        row-key="id"
+        :selected-rows-label="getSelectedString"
+        selection="multiple"
+        v-model:selected="selected"
+        :loading="loading"
       />
+    </div>
+
+    <div>
+      <q-dialog v-model="isShow">
+        <q-card style="width: 400px">
+          <q-card-section class="row items-center q-pb-none">
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            <div class="text-h5 text-center q-pb-md">刪除</div>
+            <div class="text-h6 text-center q-py-xs">
+              是否確認刪除 {{ selectedCount }} 筆資料?
+            </div>
+          </q-card-section>
+
+          <q-card-actions align="center" class="q-pb-xl">
+            <q-btn
+              outline
+              class="q-mr-sm"
+              label="取消"
+              color="primary"
+              v-close-popup
+            />
+            <q-btn
+              no-caps
+              label="確定"
+              color="primary"
+              v-close-popup
+              @click="removeRow"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </div>
   </q-page>
 </template>
 
 <script>
-import { reactive } from 'vue';
-import QTable from 'src/components/QTable.vue';
+import { onMounted, reactive, ref } from "vue";
+import axios from "axios";
+import QTable from "src/components/QTable.vue";
+import { format } from "date-fns";
 
 export default {
-  name: 'IndexPage',
+  name: "IndexPage",
 
   components: {
-    QTable
+    QTable,
   },
 
-  setup () {
+  setup() {
+    //取得table資料
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://35.194.177.50:7777/members");
+        //"birthday":"1990-2-28T15:00:00.000-07:00"：抓出T以前的字串再格式化
+        //console.log("data " + JSON.stringify(response.data.members));
+        state.rows = response.data.members.map((item) => ({
+          id: Math.random(),
+          ...item,
+          birthday: format(item.birthday.split("T")[0], "yyyy/MM/dd"),
+        }));
+        console.log("state.rows " + JSON.stringify(state.rows));
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    //初始化加載完成
+    onMounted(() => {
+      fetchData();
+    });
+
+    // 欄位顯示
     const state = reactive({
       columns: [
         {
-          name: 'name',
-          label: '姓名',
-          align: 'left',
-          field: 'name',
+          name: "name",
+          label: "姓名",
+          align: "left",
+          field: "name",
+          sortable: true,
+          tooltip: "Incoming candidates",
         },
         {
-          name: 'cellphone',
-          label: '手機',
-          align: 'left',
-          field: 'cellphone',
+          name: "cellphone",
+          label: "手機",
+          align: "left",
+          field: "cellphone",
+          sortable: true,
         },
         {
-          name: 'email',
-          label: '信箱',
-          align: 'left',
-          field: 'email',
+          name: "email",
+          label: "信箱",
+          align: "left",
+          field: "email",
+          sortable: true,
         },
         {
-          name: 'gender',
-          label: '性別',
-          align: 'left',
-          field: 'gender',
+          name: "gender",
+          label: "性別",
+          align: "left",
+          field: "gender",
+          sortable: true,
         },
         {
-          name: 'birthday',
-          label: '生日',
-          align: 'left',
-          field: 'birthday',
+          name: "birthday",
+          label: "生日",
+          align: "left",
+          field: "birthday",
+          sortable: true,
         },
       ],
       rows: [],
     });
 
+    //新增
+    const loading = ref(false);
+    const rowCount = ref(state.rows.length);
+
+    //勾選刪除
+    const selected = ref([]);
+    const selectedCount = ref(selected.value.length);
+    const isShow = ref(false);
+
     return {
       state,
-    }
-  }
+      loading,
+      selected,
+      selectedCount,
+      isShow,
+
+      //新增一筆資料
+      addRow() {
+        //點按時開啟loading
+        loading.value = true;
+
+        setTimeout(() => {
+          //如果rows刪光，要初始化
+          if (state.rows.length === 0) {
+            rowCount.value = 0;
+          }
+
+          const newRow = {
+            id: Math.random(),
+            name: "",
+            cellphone: "",
+            email: "",
+            gender: "",
+            birthday: "",
+          };
+          //加在最上行
+          state.rows = [newRow, ...state.rows];
+          console.log("addrow " + JSON.stringify(state.rows));
+          //加完後關閉loading
+          loading.value = false;
+        }, 500);
+      },
+
+      //按下刪除鈕後顯示dialog
+      deleteBtn() {
+        //顯示dialog
+        isShow.value = true;
+        //dialog上顯示選取幾筆資料
+        selectedCount.value = selected.value.length;
+      },
+
+      //刪除一筆資料
+      removeRow() {
+        loading.value = true;
+        setTimeout(() => {
+          selected.value.forEach((selectedRow) => {
+            const index = state.rows.findIndex(
+              (row) => row.id === selectedRow.id
+            );
+
+            state.rows = [
+              ...state.rows.slice(0, index),
+              ...state.rows.slice(index + 1),
+            ];
+          }),
+            //刪完後關閉loading
+            (loading.value = false);
+          //刪完清除選擇的列
+          selected.value.length = 0;
+        }, 500);
+      },
+
+      getSelectedString() {
+        return selected.value.length === 0
+          ? ""
+          : `已選 ${selected.value.length} 筆資料`;
+      },
+    };
+  },
 };
 </script>
 <style lang="scss" scoped>
