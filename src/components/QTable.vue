@@ -21,7 +21,7 @@
   </q-table>
 </template>
 <script>
-import { onMounted } from "vue";
+import { onMounted } from 'vue';
 
 export default {
   props: {

@@ -6,12 +6,7 @@
 
         <div>
           <q-btn class="q-mr-sm" color="primary" label="新增" @click="addRow" />
-          <q-btn
-            color="white"
-            text-color="black"
-            label="刪除"
-            @click="deleteBtn"
-          />
+          <q-btn color="white" text-color="black" label="刪除" @click="deleteBtn" />
         </div>
       </div>
       <QTable
@@ -35,26 +30,12 @@
 
           <q-card-section class="q-pt-none">
             <div class="text-h5 text-center q-pb-md">刪除</div>
-            <div class="text-h6 text-center q-py-xs">
-              是否確認刪除 {{ selectedCount }} 筆資料?
-            </div>
+            <div class="text-h6 text-center q-py-xs">是否確認刪除 {{ selectedCount }} 筆資料?</div>
           </q-card-section>
 
           <q-card-actions align="center" class="q-pb-xl">
-            <q-btn
-              outline
-              class="q-mr-sm"
-              label="取消"
-              color="primary"
-              v-close-popup
-            />
-            <q-btn
-              no-caps
-              label="確定"
-              color="primary"
-              v-close-popup
-              @click="removeRow"
-            />
+            <q-btn outline class="q-mr-sm" label="取消" color="primary" v-close-popup />
+            <q-btn no-caps label="確定" color="primary" v-close-popup @click="removeRow" />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -63,13 +44,13 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue";
-import axios from "axios";
-import QTable from "src/components/QTable.vue";
-import { format } from "date-fns";
+import { onMounted, reactive, ref } from 'vue';
+import axios from 'axios';
+import QTable from 'src/components/QTable.vue';
+import { format } from 'date-fns';
 
 export default {
-  name: "IndexPage",
+  name: 'IndexPage',
 
   components: {
     QTable,
@@ -79,17 +60,17 @@ export default {
     //取得table資料
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://35.194.177.50:7777/members");
+        const response = await axios.get('http://35.194.177.50:7777/members');
         //"birthday":"1990-2-28T15:00:00.000-07:00"：抓出T以前的字串再格式化
         //console.log("data " + JSON.stringify(response.data.members));
         state.rows = response.data.members.map((item) => ({
           id: Math.random(),
           ...item,
-          birthday: format(item.birthday.split("T")[0], "yyyy/MM/dd"),
+          birthday: format(item.birthday.split('T')[0], 'yyyy/MM/dd'),
         }));
-        console.log("state.rows " + JSON.stringify(state.rows));
+        console.log('state.rows ' + JSON.stringify(state.rows));
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -102,39 +83,39 @@ export default {
     const state = reactive({
       columns: [
         {
-          name: "name",
-          label: "姓名",
-          align: "left",
-          field: "name",
+          name: 'name',
+          label: '姓名',
+          align: 'left',
+          field: 'name',
           sortable: true,
-          tooltip: "Incoming candidates",
+          tooltip: 'Incoming candidates',
         },
         {
-          name: "cellphone",
-          label: "手機",
-          align: "left",
-          field: "cellphone",
-          sortable: true,
-        },
-        {
-          name: "email",
-          label: "信箱",
-          align: "left",
-          field: "email",
+          name: 'cellphone',
+          label: '手機',
+          align: 'left',
+          field: 'cellphone',
           sortable: true,
         },
         {
-          name: "gender",
-          label: "性別",
-          align: "left",
-          field: "gender",
+          name: 'email',
+          label: '信箱',
+          align: 'left',
+          field: 'email',
           sortable: true,
         },
         {
-          name: "birthday",
-          label: "生日",
-          align: "left",
-          field: "birthday",
+          name: 'gender',
+          label: '性別',
+          align: 'left',
+          field: 'gender',
+          sortable: true,
+        },
+        {
+          name: 'birthday',
+          label: '生日',
+          align: 'left',
+          field: 'birthday',
           sortable: true,
         },
       ],
@@ -170,15 +151,15 @@ export default {
 
           const newRow = {
             id: Math.random(),
-            name: "",
-            cellphone: "",
-            email: "",
-            gender: "",
-            birthday: "",
+            name: '',
+            cellphone: '',
+            email: '',
+            gender: '',
+            birthday: '',
           };
           //加在最上行
           state.rows = [newRow, ...state.rows];
-          console.log("addrow " + JSON.stringify(state.rows));
+          console.log('addrow ' + JSON.stringify(state.rows));
           //加完後關閉loading
           loading.value = false;
         }, 500);
@@ -197,14 +178,9 @@ export default {
         loading.value = true;
         setTimeout(() => {
           selected.value.forEach((selectedRow) => {
-            const index = state.rows.findIndex(
-              (row) => row.id === selectedRow.id
-            );
+            const index = state.rows.findIndex((row) => row.id === selectedRow.id);
 
-            state.rows = [
-              ...state.rows.slice(0, index),
-              ...state.rows.slice(index + 1),
-            ];
+            state.rows = [...state.rows.slice(0, index), ...state.rows.slice(index + 1)];
           }),
             //刪完後關閉loading
             (loading.value = false);
@@ -214,9 +190,7 @@ export default {
       },
 
       getSelectedString() {
-        return selected.value.length === 0
-          ? ""
-          : `已選 ${selected.value.length} 筆資料`;
+        return selected.value.length === 0 ? '' : `已選 ${selected.value.length} 筆資料`;
       },
     };
   },
