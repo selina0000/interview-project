@@ -8,6 +8,15 @@
     flat
     bordered
   >
+    <q-td :props="props">
+      <div>
+        {{ props.value }}
+        <q-tooltip>
+          {{ props.value }}
+        </q-tooltip>
+      </div>
+    </q-td>
+    
     <template v-slot:body-cell="props">
       <q-td :props="props">
         <div>

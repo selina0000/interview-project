@@ -9,6 +9,38 @@
           <q-btn color="white" text-color="black" label="刪除" @click="deleteBtn" />
         </div>
       </div>
+
+      <div class="row q-mt-md q-mb-none">
+        <div class="q-mr-md">
+          <q-input rounded outlined clearable label="搜尋姓名" bottom-slots v-model="nameText">
+            <template v-slot:append>
+              <q-icon name="search" @click="search('name')" />
+            </template>
+          </q-input>
+        </div>
+        <div class="q-mr-md">
+          <q-input rounded outlined clearable label="搜尋手機" bottom-slots v-model="cellphoneText">
+            <template v-slot:append>
+              <q-icon name="search" @click="search('cellphone')" />
+            </template>
+          </q-input>
+        </div>
+        <div class="q-mr-md">
+          <q-input rounded outlined clearable label="搜尋信箱" bottom-slots v-model="emailText">
+            <template v-slot:append>
+              <q-icon name="search" @click="search('email')" />
+            </template>
+          </q-input>
+        </div>
+        <div class="q-mr-md">
+          <q-input rounded outlined clearable label="搜尋性別" bottom-slots v-model="genderText">
+            <template v-slot:append>
+              <q-icon name="search" @click="search('gender')" />
+            </template>
+          </q-input>
+        </div>
+      </div>
+
       <QTable
         :columns="state.columns"
         :rows="state.rows"
@@ -44,7 +76,7 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
 import QTable from 'src/components/QTable.vue';
 import { format } from 'date-fns';
@@ -86,7 +118,6 @@ export default {
           align: 'left',
           field: 'name',
           sortable: true,
-          tooltip: 'Incoming candidates',
         },
         {
           name: 'cellphone',
@@ -129,12 +160,33 @@ export default {
     const selectedCount = ref(selected.value.length);
     const isShow = ref(false);
 
+    //搜尋
+    const nameText = ref('');
+    const cellphoneText = ref('');
+    const emailText = ref('');
+    const genderText = ref('');
+
+    //監測input輸入框是否有值，當它為空時，table回到原始狀態
+    watch(
+      [nameText, cellphoneText, emailText, genderText],
+      ([newName, newCellphone, newEmail, newGender]) => {
+        //檢查是否為空，返回true或false
+        if ([newName, newCellphone, newEmail, newGender].every((val) => !val)) {
+          fetchData();
+        }
+      }
+    );
+
     return {
       state,
       loading,
       selected,
       selectedCount,
       isShow,
+      nameText,
+      cellphoneText,
+      emailText,
+      genderText,
 
       //新增一筆資料
       addRow() {
@@ -188,6 +240,43 @@ export default {
 
       getSelectedString() {
         return selected.value.length === 0 ? '' : `已選 ${selected.value.length} 筆資料`;
+      },
+
+      search(item) {
+        let filter = {};
+        switch (item) {
+          case 'name':
+            filter = { name: nameText.value };
+            break;
+          case 'cellphone':
+            filter = { cellphone: cellphoneText.value };
+            break;
+          case 'email':
+            filter = { email: emailText.value };
+            break;
+          case 'gender':
+            filter = { gender: genderText.value };
+            break;
+        }
+
+        const fetchSearch = async () => {
+          try {
+            const response = await axios.post('http://35.194.177.50:7777/members/search', {
+              filter: filter,
+              sort: 'name',
+            });
+
+            state.rows = response.data.members.map((item) => ({
+              id: Math.random(),
+              ...item,
+              birthday: format(item.birthday.split('T')[0], 'yyyy/MM/dd'),
+            }));
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        };
+
+        fetchSearch();
       },
     };
   },
