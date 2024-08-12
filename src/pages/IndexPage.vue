@@ -62,13 +62,11 @@ export default {
       try {
         const response = await axios.get('http://35.194.177.50:7777/members');
         //"birthday":"1990-2-28T15:00:00.000-07:00"：抓出T以前的字串再格式化
-        //console.log("data " + JSON.stringify(response.data.members));
         state.rows = response.data.members.map((item) => ({
           id: Math.random(),
           ...item,
           birthday: format(item.birthday.split('T')[0], 'yyyy/MM/dd'),
         }));
-        console.log('state.rows ' + JSON.stringify(state.rows));
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -159,7 +157,6 @@ export default {
           };
           //加在最上行
           state.rows = [newRow, ...state.rows];
-          console.log('addrow ' + JSON.stringify(state.rows));
           //加完後關閉loading
           loading.value = false;
         }, 500);
