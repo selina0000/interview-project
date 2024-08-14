@@ -232,26 +232,26 @@ export default {
           filter = { gender: genderText.value };
           break;
       }
+      fetchSearch(filter);
+    };
 
-      // FIXME: 4. 盡量不要在 function 裡面再包一層 function，獨立 function 比較好維護和測試，除非有特殊用途
-      const fetchSearch = async () => {
-        try {
-          const response = await axios.post('http://35.194.177.50:7777/members/search', {
-            filter: filter,
-            sort: 'name',
-          });
+    // FIXME: 4. 盡量不要在 function 裡面再包一層 function，獨立 function 比較好維護和測試，除非有特殊用途
+    // FIXED
+    const fetchSearch = async (filter) => {
+      try {
+        const response = await axios.post('http://35.194.177.50:7777/members/search', {
+          filter: filter,
+          sort: 'name',
+        });
 
-          state.rows = response.data.members.map((item) => ({
-            id: Math.random(),
-            ...item,
-            birthday: format(item.birthday.split('T')[0], 'yyyy/MM/dd'),
-          }));
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-
-      fetchSearch();
+        state.rows = response.data.members.map((item) => ({
+          id: Math.random(),
+          ...item,
+          birthday: format(item.birthday.split('T')[0], 'yyyy/MM/dd'),
+        }));
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
 
     //監測input輸入框是否有值，當它為空時，table回到原始狀態
