@@ -52,8 +52,6 @@
       />
     </div>
 
-    <!-- FIXME: 1. 最外層 div 應該不需要 -->
-    <!-- FIXED -->
     <q-dialog v-model="isShow">
       <q-card style="width: 400px">
         <q-card-section class="row items-center q-pb-none">
@@ -75,8 +73,6 @@
   </q-page>
 </template>
 
-<!-- FIXME: 2. 改成用 Composition API + es6 語法 -->
-<!-- FIXED -->
 <script>
 import { onMounted, reactive, ref, watch } from 'vue';
 import axios from 'axios';
@@ -217,8 +213,7 @@ export default {
     const genderText = ref('');
     const search = (item) => {
       let filter = {};
-      // FIXME: 3. 以畫面設計，filter 有可能不只一個參數，filter 要改成可接受多個搜尋條件
-      // FIXED
+
       if (nameText.value) {
         filter.name = nameText.value;
       }
@@ -238,8 +233,6 @@ export default {
       fetchSearch(filter);
     };
 
-    // FIXME: 4. 盡量不要在 function 裡面再包一層 function，獨立 function 比較好維護和測試，除非有特殊用途
-    // FIXED
     const fetchSearch = async (filter) => {
       try {
         const response = await axios.post('http://35.194.177.50:7777/members/search', {
