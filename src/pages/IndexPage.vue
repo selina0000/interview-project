@@ -218,20 +218,23 @@ export default {
     const search = (item) => {
       let filter = {};
       // FIXME: 3. 以畫面設計，filter 有可能不只一個參數，filter 要改成可接受多個搜尋條件
-      switch (item) {
-        case 'name':
-          filter = { name: nameText.value };
-          break;
-        case 'cellphone':
-          filter = { cellphone: cellphoneText.value };
-          break;
-        case 'email':
-          filter = { email: emailText.value };
-          break;
-        case 'gender':
-          filter = { gender: genderText.value };
-          break;
+      // FIXED
+      if (nameText.value) {
+        filter.name = nameText.value;
       }
+
+      if (cellphoneText.value) {
+        filter.cellphone = cellphoneText.value;
+      }
+
+      if (emailText.value) {
+        filter.email = emailText.value;
+      }
+
+      if (genderText.value) {
+        filter.gender = genderText.value;
+      }
+      //若有值，就會含key&value
       fetchSearch(filter);
     };
 
